@@ -46,6 +46,7 @@ function createTableOfContents() {
 
 // To use the function, you can append the table of contents to a specific element in your HTML
 document.body.appendChild(createTableOfContents());
+
 // This function creates a list(`<ul>`) where each item (`<li>`) contains a link (<a>) to a heading in the document.
 // It also ensures that each heading has a unique 'id' attribute, which is used for the anchor's 'href'.
 // To use this function, simply call it and append the returned element to your document wherever you want the table of contents to appear.
@@ -149,3 +150,355 @@ const transformed = transformValues(input, value =>
 );
 
 console.log(transformed);
+/* The 'transformValues' function takes an 'input' and a 'transformFunc'.
+If the 'input' is an array, it maps over the array, applying the 'transformValues' function
+recursively to each element.
+If the 'input' is an object (and not 'null'), it creates a new object, iterating over each key and 
+applying the 'transformValues' function recursively to each value.
+If the 'input' is neither an array nor an object it applies the 'transformFunc' to the 'input' and returns 
+the results.
+-The provided 'transformFunc' in the example usage is a simple function that turns strings to uppercase.
+The transformation is applied to all string values in the nested object/array structure.
+-This approach is flexible and can be adapted to various types of transformations by changing the 
+'transformFunc'. */
+
+
+// 11. Implement a function that determines if two values are deep equal.
+function deepEqual(a, b) {
+    if (a === b) {
+        return true;
+    }
+    if (typeof a != 'object' || typeof b != 'object' || a == null || b == null) {
+        return false;
+    }
+    let keysA = Object.keys(a), keysB = Object.keys(b);
+    if (keysA.length != keysB.length) {
+        return false;
+    }
+    for (let key of keysA) {
+        if (!keysB.includes(key) || !deepEqual(a[key], b[key])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+// 12. Implement a function that returns a new object after squashing the input object.
+function squashObject(obj, prefix = '') {
+    let squashed = {};
+
+    for(const key in obj) {
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+            // Recursive case: the value is a nested object
+            squashed = {
+                ...squashed,
+                ...squashObject(obj[key], `${prefix}${key}.`)
+            };
+        } else {
+            //Base case: the value is primitive
+            squashed[prefix + key] = obj[key];
+        }
+    }
+
+    return squashed;
+}
+
+// Example usage 
+const input = {
+    a: 1,
+    b: {
+        c: 2,
+        d: {e: 3}
+    }
+};
+
+console.log(squashObject(input));
+/* 'squashObject' takes an object 'obj' and an optional 'prefix' parameter.
+It iterates over the keys of the object.
+If a value is nested object(but not 'null'), it calls itself recursively, appending the current key
+to the prefix.
+If a value is a primitive (not an object), it adds it to the result with the full key path as its key.
+The function returns a new object with the "squashed" key-value pairs.
+
+The output for the provided 'input' example. 
+
+{
+    "a": 1,
+    "b.c": 2,
+    "b.d.e": 3
+} */
+
+// 13. Implement a function that creates a resumable interval object.
+class ResumableInterval {
+    constructor(callback, interval) {
+        this.callback = callback;
+        this.interval = interval;
+        this.intervalId = null;
+        this.isRunning = false;
+    }
+
+    start() {
+        if (!this.isRunning) {
+            this.intervalId = setInterval(this.callback, this.interval);
+            this.isRunning = true;
+        }
+    }
+
+    pause() {
+        if (this.isRunning) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+            this.isRunning = false;
+        }
+    }
+
+    resume() {
+        this.start();
+    }
+}
+
+// Example usage:
+const intervalObject = new ResumableInterval(() => {
+    console.log('Interval triggered');
+}, 1000);
+
+// Start the interval
+intervalObject.start();
+
+// To pause the interval (for example, after 3 seconds)
+setTimeout(() => {
+    intervalObject.pause();
+    console.log('Interval paused');
+}, 3000);
+
+// To resume the interval (for example, after another 3 seconds)
+setTimeout(() => {
+    intervalObject.resume();
+    console.log('Interval resumed');
+}, 6000);
+
+
+// 14.  Implement the functionality behaviour of Promise.any ()
+/* Promise.any() takes an iterable of Promise objects and, as soon as one of the 
+promises in the iterable fulfills, returns a single promise that resolves
+with the value from that promise. */
+
+// 15. Implement the functionality behaviour of Promise.allSettled
+/* Promise.allSettled() returns a promise that resolves after all of the given 
+promises have either fulfilled or rejected, with an array of objects that 
+each describe the outcome of each promise. */
+
+function allSettled(promises) {
+    return new Promise(resolve => {
+        let results = [];
+        let completed = 0;
+
+        promises.forEach((promise, index) => {
+            Promise.resolve(promise).then(
+                value => {
+                    results[index] = { status: 'fulfilled', value };
+                },
+                reason => {
+                    results[index] = { status: 'rejected', reason };
+                }
+            ).finally(() => {
+                completed++;
+                if (completed === promises.length) {
+                    resolve(results);
+                }
+            });
+        });
+    });
+}
+
+// Example usage
+const promise1 = Promise.resolve(3);
+const promise2 = new Promise((resolve, reject) => setTimeout(reject, 100, 'foo'));
+const promises = [promise1, promise2];
+
+allSettled(promises)
+    .then((results) => console.log(results));
+
+/* the above implementation 
+-'allSettled' takes an array of 'promise'.
+-It creates an array results to store the outcome of each promise.
+-It iterates over each promise, wrapping each with Promise.resolve() to ensure each item is treated as a promise.
+-For each promise, it uses .then() to handle both fulfillment and rejection. 
+The results are stored in the results array with the same order as the input promises.
+-Each result is an object with either { status: 'fulfilled', value: ... } 
+for fulfilled promises, or { status: 'rejected', reason: ... } for rejected promises.
+-A finally block increments the completed count. 
+When all promises have settled (either fulfilled or rejected), the function resolves with the results array. */
+
+//  16. Implement a function that returns a memoized version of a function which accepts a single argument.
+function memoizeSingleArg(func) {
+    const cache = new Map();
+    return function(arg) {
+        if (cache.has(arg)) {
+            return cache.get(arg);
+        }
+        const result = func(arg);
+        cache.set(arg, result);
+        return result;
+    };
+}
+
+// 17. Implement a function that formats a list of items into a single readable string.
+function formatList(list) {
+    return list.join(', ').replace(/, ([^,]*)$/, ' and $1');
+}
+
+// 18. Implement a class that can subscribe to and emit events that trigger attached callback functions.
+class EventEmitter {
+    constructor() {
+        this.events = {};
+    }
+
+    on(event, listener) {
+        if (!this.events[event]) {
+            this.events[event] = [];
+        }
+        this.events[event].push(listener);
+    }
+
+    emit(event, ...args) {
+        if (this.events[event]) {
+            this.events[event].forEach(listener => listener(...args));
+        }
+    }
+
+    off(event, listener) {
+        if (this.events[event]) {
+            this.events[event] = this.events[event].filter(1 => 1 !== listener);
+        }
+    }
+}
+
+// 19. Implement a debounce function that comes with a cancel method to cancel delayed invocations.
+function debounce(func, wait) {
+    let timeout;
+
+    function debounced(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func.apply(this, args);
+        };
+
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    }
+
+    debounced.cancel = function() {
+        clearTimeout(timeout);
+    };
+
+    return debounced;
+}
+
+// 20. Implement a function to merge rows of data from the same user.
+function mergeRowsByUser(data) {
+    const mergedData = {};
+
+    data.forEach(row => {
+        const userId = row.userId;
+
+        if (!mergedData[userId]) {
+            mergedData[userId] = {};
+        }
+
+        Object.keys(row).forEach(key => {
+            mergedData[userId][key] = row[key];
+        });
+    });
+
+    return Object.values(mergedData);
+}
+
+// Example usage
+const rows = [
+    { userId: 1, name: "Alice", age: 25, occupation: "Engineer" },
+    { userId: 2, name: "Bob", age: 30, occupation: "Designer" },
+    { userId: 1, age: 26, occupation: "Senior Engineer" },
+    { userId: 3, name: "Charlie", age: 28 }
+];
+
+const mergedRows = mergeRowsByUser(rows);
+console.log(mergedRows);
+
+
+// 21. Implement a function that recursively flattens an array into a single level deep.
+function flattenArray(arr) {
+    return arr.reduce((flat, toFlatten) => {
+        return flat.concat(Array.isArray(toFlatten) ? flattenArray(toFlatten) : toFlatten);
+    }, []);
+}
+
+
+// 22. Implement a function that returns an object with all falsey values removed.
+function removeFalseyValues(obj) {
+    return Object.entries(obj)
+        .filter(([_, value]) => Boolean(value))
+        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+}
+
+// 23. Implement a function to resolve a given value to a Promise.
+function resolveToPromise(value) {
+    return Promise.resolve(value);
+}
+
+// 24. Implement a Turtle class that moves a turtle on a 2D plane.
+class Turtle {
+    constructor(x = 0, y = 0) {
+        this.x = x;
+        this.y = y;
+    }
+
+    move(dx, dy) {
+        this.x += dx;
+        this.y += dy;
+    }
+
+    getPosition() {
+        return { x: this.x, y: this.y };
+    }
+}
+
+// 25. Implement a function to execute N async tasks in series.
+async function executeTasksInSeries(tasks) {
+    for (const task of tasks) {
+        await task();
+    }
+}
+
+// 26. Implement a promisify function that allows the original function to override the return value.
+function promisify(original) {
+    return function(...args) {
+        return new Promise((resolve, reject) => {
+            try {
+                original.call(this, ...args, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            } catch (error) {
+                reject(error);
+            }  
+        });
+    };
+}
+
+// 27. Implement a function to deserialize a JSON string.
+function fromJSON(jsonString) {
+    return JSON.parse(jsonString);
+}
+
+// 28. Implement a function to convert all the keys in an object to camel case.
+function toCamelCase(obj) {
+    return Object.keys(obj).reduce((acc, key) => {
+        const camelCaseKey = key.replace(/([-_][a-z])/gi, ($1) => {
+            return $1.toUpperCase().replace('-', '').replace('_', '');
+        });
+        acc[camelCaseKey] = obj[key];
+        return acc;
+    }, {});
+}
