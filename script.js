@@ -502,3 +502,42 @@ function toCamelCase(obj) {
         return acc;
     }, {});
 }
+
+// 29. What is Set in JavaScript?
+/* Set is another data structure in JavaScript which is similar to Array
+but the values are unique. It is a collection of elements where each element is stored as a value
+without any keys.*/
+
+// Example 
+ const roadmap = new Set();
+ roadmap.add('JavaScript');
+ roadmap.add('JavaScript');
+
+ roadmap.add('dynamic');
+ roadmap.add(1995);
+
+ console.log(roadmap.size); // 3, because the value 'JavaScript' is already present in the set
+ console.log(roadmap.has('JavaScript')); // true
+
+ roadmap.delete('JavaScript');
+ console.log(roadmap.has('JavaScript')); // false
+ console.log(roadmap.size); // 2
+
+//  30. How to use `reduce()` method
+/* You can use the reduce() method to reduce an array to a single value. The reduce() method 
+executes a reducer function (that you provide) on each element of the array, resulting in a single 
+output value.*/
+//  Syntax 
+Array.reduce((accumulator, currentValue) => {
+
+}, initialValue);
+
+// Example 
+const numbers = [1, 2, 3, 4, 5, 6];
+
+const sum = numbers.reduce((accumulator, currentValue) => {
+    return accumulator + currentValue;
+}, 0);
+
+console.log(numbers); // [1, 2, 3, 4, 5, 6]
+console.log(sum); // 21
