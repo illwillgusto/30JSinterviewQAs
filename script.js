@@ -541,3 +541,24 @@ const sum = numbers.reduce((accumulator, currentValue) => {
 
 console.log(numbers); // [1, 2, 3, 4, 5, 6]
 console.log(sum); // 21
+
+
+
+// Bonus questions, these questions are good for studying purposes & good for muscle memory.
+
+/* 1. What is the exact difference between event bubbling and delegation, and explain
+the phases involved in this whole process? */
+
+/* 2. What are closures in Javascript, and how does it differentiate the "this" accordingly? */
+
+/* 3. Why is the Javascript code snippet preferably added to the end of the <body>, how can we 
+replicate the same use case placing elsewhere? */
+
+/* 4. Before promises, how were the asynchronous calls being made and what changes did promises, 
+async/await add to it? */
+
+/* 5. How can you access the CSS variables/custom properties in Javascript? */
+
+/* 6. What data structures are behind the DOM and its implementation? */
+
+/* 7. How does the hoisting work on the "var" function and variable declarations, is there priority? */
